@@ -31,8 +31,8 @@ const categories = [
   { title: "Ресторани", count: 2, icon: Store, image: "/images/editorial/sushi.jpg", href: "/restaurants?category=sushi" },
   { title: "Продукти", count: 1, icon: ShoppingBasket, image: "/images/editorial/grocery.jpg", href: "/restaurants?category=grocery" },
   { title: "Аптеки", count: 1, icon: Pill, image: "/images/editorial/pharmacy.jpg", href: "/restaurants?category=pharmacy" },
-  { title: "Автозапчастини", count: 1, icon: Wrench, image: "/images/editorial/courier.jpg", href: "/restaurants?category=autoparts" },
-  { title: "Документи", count: 2, icon: FileText, image: "/images/editorial/courier.jpg", href: "/delivery-zone" },
+  { title: "Автозапчастини", count: 1, icon: Wrench, image: "/images/editorial/hero-voron-courier.jpg", href: "/restaurants?category=autoparts" },
+  { title: "Документи", count: 2, icon: FileText, image: "/images/editorial/hero-voron-courier.jpg", href: "/delivery-zone" },
   { title: "Інше", count: 3, icon: Package, image: "/images/editorial/grocery.jpg", href: "/restaurants" }
 ];
 
@@ -44,12 +44,6 @@ const categoryLabels = {
   autoparts: "Автозапчастини",
   flowers: "Квіти"
 } as const;
-
-const heroFloating = [
-  { src: "/images/editorial/sushi.jpg", label: "OSAMA", className: "left-0 top-6 sm:left-2 sm:top-10", href: "/restaurants/osama" },
-  { src: "/images/editorial/pharmacy.jpg", label: "Аптека", className: "right-0 top-20 sm:right-3 sm:top-24", href: "/restaurants?category=pharmacy" },
-  { src: "/images/editorial/grocery.jpg", label: "Маркет", className: "left-8 bottom-1 sm:left-12 sm:bottom-3", href: "/restaurants?category=grocery" }
-];
 
 const serviceList = [
   "Продукти та щоденні покупки",
@@ -95,9 +89,21 @@ export default function HomePage() {
   return (
     <main className="bg-[#F6F6F4] text-[#171717]">
       <section className="px-3 pb-6 pt-4 sm:px-4 sm:pb-8 sm:pt-6">
-        <div className="container-shell overflow-hidden rounded-[36px] bg-[#151515] text-white">
-          <div className="grid gap-8 px-4 py-5 sm:px-7 sm:py-8 xl:grid-cols-[1.03fr_0.97fr] xl:items-center xl:px-10 xl:py-10">
-            <div className="relative z-10">
+        <div className="container-shell relative overflow-hidden rounded-[36px] text-white">
+          <div className="absolute inset-0">
+            <Image
+              src="/images/editorial/hero-voron-courier.jpg"
+              alt="Кур'єр VORON EXPRESS"
+              fill
+              className="object-cover object-[66%_42%] sm:object-[70%_42%]"
+              sizes="100vw"
+              priority
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(21,21,21,0.88)_0%,rgba(21,21,21,0.74)_28%,rgba(21,21,21,0.36)_52%,rgba(21,21,21,0.1)_76%,rgba(21,21,21,0.02)_100%)]" />
+          </div>
+
+          <div className="relative z-10 px-4 py-5 sm:px-7 sm:py-8 xl:px-10 xl:py-12">
+            <div className="max-w-[680px]">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-2 text-[12px] font-semibold text-neutral-200">
                 <Sparkles className="h-4 w-4 text-[#FFC400]" />
                 Локальна доставка у Воронькові та районі
@@ -116,18 +122,18 @@ export default function HomePage() {
               </p>
 
               <div className="mt-8 max-w-2xl rounded-[28px] bg-white p-3 text-[#171717] shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
-                <div className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-[#FAFAF8] px-4 py-4">
-                  <Search className="h-5 w-5 text-[#6D6D6D]" />
-                  <input
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-[#6D6D6D] sm:text-base"
-                    placeholder="Знайти заклад, товар або категорію"
-                  />
-                </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex min-h-[60px] flex-1 items-center gap-3 rounded-[20px] border border-black/8 bg-[#FAFAF8] px-4 py-4">
+                    <Search className="h-5 w-5 shrink-0 text-[#6D6D6D]" />
+                    <input
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-[#6D6D6D] sm:text-base"
+                      placeholder="Знайти заклад, товар або категорію"
+                    />
+                  </div>
 
-                <div className="mt-3 flex items-center justify-end">
                   <Link
                     href="/restaurants"
-                    className="inline-flex items-center justify-center rounded-full bg-[#FFC400] px-5 py-3 text-sm font-bold text-[#171717] transition-colors hover:bg-[#EBAF00]"
+                    className="inline-flex min-h-[60px] items-center justify-center rounded-[20px] bg-[#FFC400] px-6 py-3 text-sm font-bold text-[#171717] transition-colors hover:bg-[#EBAF00] sm:shrink-0"
                   >
                     Знайти заклад
                   </Link>
@@ -138,7 +144,7 @@ export default function HomePage() {
                 {["швидко", "надійно", "поруч"].map((item) => (
                   <span
                     key={item}
-                    className="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-semibold text-neutral-200"
+                    className="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-semibold text-[#FFC400]"
                   >
                     {item}
                   </span>
@@ -148,72 +154,10 @@ export default function HomePage() {
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 {heroStats.map((item) => (
                   <div key={item.label} className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-4">
-                    <div className="font-display text-2xl font-black tracking-[-0.05em] text-white">{item.value}</div>
+                    <div className="font-display text-2xl font-black tracking-[-0.05em] text-[#FFC400]">{item.value}</div>
                     <div className="mt-1 text-sm text-neutral-300">{item.label}</div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            <div className="relative min-h-[440px] rounded-[30px] bg-[#262626] p-3 sm:min-h-[560px] sm:p-5">
-              <div className="hero-glow absolute left-8 top-10 h-24 w-24 rounded-full bg-[#FFC400]/20 blur-3xl" />
-              <div className="hero-glow absolute bottom-8 right-10 h-28 w-28 rounded-full bg-white/10 blur-3xl" />
-              <div className="absolute inset-0 rounded-[30px] border border-white/8" />
-
-              <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold text-white">
-                Доставка маркетплейс-формату
-              </div>
-
-              <div className="absolute inset-[15%_7%_16%_16%] overflow-hidden rounded-[30px] bg-[#1B1B1B]">
-                <Image
-                  src="/images/editorial/courier.jpg"
-                  alt="Кур'єр VORON EXPRESS"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1280px) 100vw, 40vw"
-                  priority
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,21,21,0.02),rgba(21,21,21,0.78))]" />
-                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                  <div className="max-w-[240px] rounded-[24px] border border-white/10 bg-black/45 p-4 backdrop-blur">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#FFC400]">VORON EXPRESS</div>
-                    <div className="mt-2 font-display text-2xl font-black tracking-[-0.04em] text-white">Поруч і вчасно</div>
-                    <div className="mt-2 text-sm leading-6 text-neutral-300">Локальна доставка для щоденних замовлень без зайвого шуму.</div>
-                  </div>
-                </div>
-              </div>
-
-              {heroFloating.map((item, index) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`floating-chip absolute ${item.className} block w-[104px] sm:w-[126px]`}
-                  style={{ animationDelay: `${index * 0.7}s` }}
-                >
-                  <div className="mx-auto h-[84px] w-[84px] overflow-hidden rounded-full border-4 border-[#151515] shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:h-[100px] sm:w-[100px]">
-                    <Image src={item.src} alt={item.label} width={100} height={100} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="mt-2 rounded-full bg-white px-3 py-1 text-center text-xs font-semibold text-[#171717]">
-                    {item.label}
-                  </div>
-                </Link>
-              ))}
-
-              <div className="absolute right-3 top-[26%] hidden w-[190px] rounded-[24px] border border-white/10 bg-white/7 p-4 backdrop-blur sm:block">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-300">Сьогодні популярно</div>
-                <div className="mt-3 space-y-3">
-                  {["Суші сети", "Аптечні покупки", "Щоденні продукти"].map((item) => (
-                    <div key={item} className="flex items-center justify-between rounded-[16px] bg-white/8 px-3 py-2">
-                      <span className="text-sm text-white">{item}</span>
-                      <span className="text-xs font-semibold text-[#FFC400]">швидко</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="absolute bottom-4 left-auto right-4 rounded-[22px] bg-white px-4 py-4 text-[#171717] shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:right-5">
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-[#6D6D6D]">Замовлення за 1 хв</div>
-                <div className="font-display mt-2 text-2xl font-black tracking-[-0.04em]">VORON EXPRESS</div>
               </div>
             </div>
           </div>
