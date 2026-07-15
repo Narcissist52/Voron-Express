@@ -10,16 +10,21 @@ import {
 } from "react";
 
 import { restaurants } from "@/data/mock-data";
+import { getDeliveryFeeCents, getOrderTotalCents } from "@/lib/delivery";
 import type { CartItem, Product } from "@/types";
 
 type CartContextValue = {
   items: CartItem[];
   restaurantId: string | null;
+  deliveryZoneId: string | null;
   itemCount: number;
   subtotal: number;
+  deliveryFee: number | null;
+  total: number;
   addItem: (product: Product) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
+  setDeliveryZoneId: (zoneId: string | null) => void;
   clearCart: () => void;
 };
 
@@ -29,23 +34,24 @@ const STORAGE_KEY = "voron-express-cart";
 type PersistedCart = {
   items: CartItem[];
   restaurantId: string | null;
+  deliveryZoneId: string | null;
 };
 
 const getStoredCart = (): PersistedCart => {
   if (typeof window === "undefined") {
-    return { items: [], restaurantId: null };
+    return { items: [], restaurantId: null, deliveryZoneId: null };
   }
 
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    return { items: [], restaurantId: null };
+    return { items: [], restaurantId: null, deliveryZoneId: null };
   }
 
   try {
     return JSON.parse(stored) as PersistedCart;
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
-    return { items: [], restaurantId: null };
+    return { items: [], restaurantId: null, deliveryZoneId: null };
   }
 };
 
@@ -53,21 +59,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const initialCart = getStoredCart();
   const [items, setItems] = useState<CartItem[]>(initialCart.items);
   const [restaurantId, setRestaurantId] = useState<string | null>(initialCart.restaurantId);
+  const [deliveryZoneId, setDeliveryZoneId] = useState<string | null>(initialCart.deliveryZoneId);
 
   useEffect(() => {
-    const payload: PersistedCart = { items, restaurantId };
+    const payload: PersistedCart = { items, restaurantId, deliveryZoneId };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [items, restaurantId]);
+  }, [deliveryZoneId, items, restaurantId]);
 
   const value = useMemo<CartContextValue>(() => {
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    const deliveryFee = getDeliveryFeeCents(deliveryZoneId);
+    const total = getOrderTotalCents(subtotal, deliveryFee);
 
     return {
       items,
       restaurantId,
+      deliveryZoneId,
       itemCount,
       subtotal,
+      deliveryFee,
+      total,
       addItem: (product) => {
         if (restaurantId && restaurantId !== product.restaurantId) {
           const nextRestaurant =
@@ -77,6 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           );
           if (!confirmed) return;
           setItems([]);
+          setDeliveryZoneId(null);
         }
 
         setRestaurantId(product.restaurantId);
@@ -106,6 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const nextItems = currentItems.filter((item) => item.productId !== productId);
             if (nextItems.length === 0) {
               setRestaurantId(null);
+              setDeliveryZoneId(null);
             }
             return nextItems;
           });
@@ -121,16 +135,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
           const nextItems = currentItems.filter((item) => item.productId !== productId);
           if (nextItems.length === 0) {
             setRestaurantId(null);
+            setDeliveryZoneId(null);
           }
           return nextItems;
         });
       },
+      setDeliveryZoneId,
       clearCart: () => {
         setItems([]);
         setRestaurantId(null);
+        setDeliveryZoneId(null);
       }
     };
-  }, [items, restaurantId]);
+  }, [deliveryZoneId, items, restaurantId]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

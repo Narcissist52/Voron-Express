@@ -23,12 +23,12 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="mt-5 flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-xl font-black leading-tight text-[#171717]">{product.name}</h3>
-          {product.weight ? <span className="text-xs font-semibold text-[#6D6D6D]">{product.weight}</span> : null}
+          <h3 className="theme-text text-xl font-black leading-tight">{product.name}</h3>
+          {product.weight ? <span className="theme-text-muted text-xs font-semibold">{product.weight}</span> : null}
         </div>
-        <p className="mt-3 text-sm leading-6 text-[#6D6D6D]">{product.description}</p>
+        <p className="theme-text-muted mt-3 text-sm leading-6">{product.description}</p>
         <div className="mt-auto flex items-center justify-between gap-4 pt-5">
-          <div className="text-lg font-black text-[#171717]">{formatMoney(product.price)}</div>
+          <div className="theme-text text-lg font-black">{formatMoney(product.price)}</div>
           <button type="button" onClick={() => addItem(product)} className="button-primary !px-4 !py-3 text-sm">
             <ShoppingBag className="h-4 w-4" />
             До кошика

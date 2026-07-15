@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -7,33 +7,24 @@ import {
   FileText,
   Package,
   Pill,
-  Search,
   ShoppingBasket,
-  Sparkles,
   Store,
   Wrench
 } from "lucide-react";
 
-import { OfferCard } from "@/components/ui/OfferCard";
-import { products, restaurants } from "@/data/mock-data";
+import { RestaurantsMap } from "@/components/maps/RestaurantsMap";
+import { HomeHero } from "@/components/sections/HomeHero";
+import { PopularOffersCarousel } from "@/components/sections/PopularOffersCarousel";
+import { deliveryZones as deliveryZoneData, products, restaurants } from "@/data/mock-data";
 import { formatMoney } from "@/lib/format";
 
-const nearbyPlaces = [
-  { label: "OSAMA", href: "/restaurants/osama" },
-  { label: "Аптека", href: "/restaurants?category=pharmacy" },
-  { label: "Продуктовий магазин", href: "/restaurants?category=grocery" },
-  { label: "Кафе", href: "/restaurants?category=cafe" },
-  { label: "Автозапчастини", href: "/restaurants?category=autoparts" },
-  { label: "Квіти", href: "/restaurants?category=flowers" }
-];
-
 const categories = [
-  { title: "Ресторани", count: 2, icon: Store, image: "/images/editorial/sushi.jpg", href: "/restaurants?category=sushi" },
-  { title: "Продукти", count: 1, icon: ShoppingBasket, image: "/images/editorial/grocery.jpg", href: "/restaurants?category=grocery" },
-  { title: "Аптеки", count: 1, icon: Pill, image: "/images/editorial/pharmacy.jpg", href: "/restaurants?category=pharmacy" },
-  { title: "Автозапчастини", count: 1, icon: Wrench, image: "/images/editorial/hero-voron-courier.jpg", href: "/restaurants?category=autoparts" },
-  { title: "Документи", count: 2, icon: FileText, image: "/images/editorial/hero-voron-courier.jpg", href: "/delivery-zone" },
-  { title: "Інше", count: 3, icon: Package, image: "/images/editorial/grocery.jpg", href: "/restaurants" }
+  { title: "Ресторани", count: 2, icon: Store, image: "/images/editorial/restaurant card.png", href: "/restaurants?category=sushi" },
+  { title: "Продукти", count: 1, icon: ShoppingBasket, image: "/images/editorial/grocery card.png", href: "/restaurants?category=grocery" },
+  { title: "Аптеки", count: 1, icon: Pill, image: "/images/editorial/pharmacy card.png", href: "/restaurants?category=pharmacy" },
+  { title: "Автозапчастини", count: 1, icon: Wrench, image: "/images/editorial/automotive card.png", href: "/restaurants?category=autoparts" },
+  { title: "Документи", count: 2, icon: FileText, image: "/images/editorial/document card.png", href: "/delivery-zone" },
+  { title: "Інше", count: 3, icon: Package, image: "/images/editorial/other card.png", href: "/restaurants" }
 ];
 
 const categoryLabels = {
@@ -43,6 +34,15 @@ const categoryLabels = {
   cafe: "Кафе",
   autoparts: "Автозапчастини",
   flowers: "Квіти"
+} as const;
+
+const restaurantCardImages = {
+  sushi: "/images/editorial/restaurant card.png",
+  pharmacy: "/images/editorial/pharmacy card.png",
+  grocery: "/images/editorial/grocery card.png",
+  cafe: "/images/editorial/restaurant card.png",
+  autoparts: "/images/editorial/automotive card.png",
+  flowers: "/images/editorial/other card.png"
 } as const;
 
 const serviceList = [
@@ -59,140 +59,32 @@ const steps = [
   { title: "Отримайте замовлення", icon: Bike, href: "/#contacts" }
 ];
 
-const deliveryZones = [
-  { title: "Зона 1", note: "до 2 км", price: "від 69 грн" },
-  { title: "Зона 2", note: "2-5 км", price: "від 89 грн" },
-  { title: "Зона 3", note: "5-8 км", price: "від 119 грн" },
-  { title: "Зона 4", note: "8+ км", price: "за погодженням" }
-];
-
-const heroStats = [
-  { value: "15-35 хв", label: "середній час" },
-  { value: "6+", label: "категорій сервісу" },
-  { value: "район поруч", label: "локальне покриття" }
-];
-
 const popularOffers = products.slice(0, 8).map((product, index) => ({
   product,
   oldPrice: index % 3 === 0 ? product.price + 5000 : undefined,
   restaurantName:
     restaurants.find((restaurant) => restaurant.id === product.restaurantId)?.name ?? "VORON EXPRESS",
   imageSrc:
-    index % 3 === 0
-      ? "/images/editorial/sushi.jpg"
-      : index % 3 === 1
-        ? "/images/editorial/grocery.jpg"
-        : "/images/editorial/pharmacy.jpg"
+    restaurantCardImages[
+      restaurants.find((restaurant) => restaurant.id === product.restaurantId)?.category ?? "sushi"
+    ]
 }));
 
 export default function HomePage() {
   return (
-    <main className="bg-[#F6F6F4] text-[#171717]">
-      <section className="px-3 pb-6 pt-4 sm:px-4 sm:pb-8 sm:pt-6">
-        <div className="container-shell relative overflow-hidden rounded-[36px] text-white">
-          <div className="absolute inset-0">
-            <Image
-              src="/images/editorial/hero-voron-courier.jpg"
-              alt="Кур'єр VORON EXPRESS"
-              fill
-              className="object-cover object-[66%_42%] sm:object-[70%_42%]"
-              sizes="100vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(21,21,21,0.88)_0%,rgba(21,21,21,0.74)_28%,rgba(21,21,21,0.36)_52%,rgba(21,21,21,0.1)_76%,rgba(21,21,21,0.02)_100%)]" />
-          </div>
+    <main className="theme-page">
+      <HomeHero />
 
-          <div className="relative z-10 px-4 py-5 sm:px-7 sm:py-8 xl:px-10 xl:py-12">
-            <div className="max-w-[680px]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-2 text-[12px] font-semibold text-neutral-200">
-                <Sparkles className="h-4 w-4 text-[#FFC400]" />
-                Локальна доставка у Воронькові та районі
-              </div>
-
-              <h1 className="font-display mt-6 max-w-3xl text-[2.75rem] font-black leading-[0.92] tracking-[-0.055em] text-white sm:text-[4rem] lg:text-[5.15rem]">
-                Замовляйте
-                <br />
-                улюблене —
-                <br />
-                <span className="text-[#FFC400]">ми доставимо</span>
-              </h1>
-
-              <p className="mt-5 max-w-xl text-[15px] leading-7 text-neutral-300 sm:text-lg">
-                Ресторани, магазини, аптеки та інші заклади Воронькова і Бориспільського району.
-              </p>
-
-              <div className="mt-8 max-w-2xl rounded-[28px] bg-white p-3 text-[#171717] shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex min-h-[60px] flex-1 items-center gap-3 rounded-[20px] border border-black/8 bg-[#FAFAF8] px-4 py-4">
-                    <Search className="h-5 w-5 shrink-0 text-[#6D6D6D]" />
-                    <input
-                      className="w-full bg-transparent text-sm outline-none placeholder:text-[#6D6D6D] sm:text-base"
-                      placeholder="Знайти заклад, товар або категорію"
-                    />
-                  </div>
-
-                  <Link
-                    href="/restaurants"
-                    className="inline-flex min-h-[60px] items-center justify-center rounded-[20px] bg-[#FFC400] px-6 py-3 text-sm font-bold text-[#171717] transition-colors hover:bg-[#EBAF00] sm:shrink-0"
-                  >
-                    Знайти заклад
-                  </Link>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {["швидко", "надійно", "поруч"].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-semibold text-[#FFC400]"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                {heroStats.map((item) => (
-                  <div key={item.label} className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-4">
-                    <div className="font-display text-2xl font-black tracking-[-0.05em] text-[#FFC400]">{item.value}</div>
-                    <div className="mt-1 text-sm text-neutral-300">{item.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-3 py-5 sm:px-4">
+      <section id="categories" className="px-3 py-7 sm:px-4 sm:py-10">
         <div className="container-shell">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-2xl font-black tracking-[-0.04em] text-[#171717] sm:text-3xl">Заклади поруч</h2>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
-            {nearbyPlaces.map((place) => (
-              <Link
-                key={place.label}
-                href={place.href}
-                className="min-w-[160px] rounded-[20px] border border-black/8 bg-white px-5 py-4 text-center text-sm font-semibold text-[#171717] shadow-[0_12px_28px_rgba(0,0,0,0.05)] transition-transform duration-200 hover:-translate-y-1"
-              >
-                {place.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="categories" className="px-3 py-8 sm:px-4 sm:py-10">
-        <div className="container-shell">
-          <div className="mb-6">
-            <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Категорії</div>
-            <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
+          <div className="mb-5 sm:mb-6">
+            <div className="theme-text-muted text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Категорії</div>
+            <h2 className="theme-text font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
               Що бажаєте замовити?
             </h2>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {categories.map((category) => {
               const Icon = category.icon;
 
@@ -200,18 +92,18 @@ export default function HomePage() {
                 <Link
                   key={category.title}
                   href={category.href}
-                  className="overflow-hidden rounded-[28px] border border-black/8 bg-white shadow-[0_16px_36px_rgba(0,0,0,0.06)] transition-transform duration-200 hover:-translate-y-1"
+                  className="card-white overflow-hidden rounded-[22px] transition-transform duration-200 hover:-translate-y-1 sm:rounded-[28px]"
                 >
-                  <div className="relative h-44">
+                  <div className="relative h-36 sm:h-44">
                     <Image src={category.image} alt={category.title} fill className="object-cover" sizes="(max-width: 1280px) 100vw, 33vw" />
                   </div>
-                  <div className="flex items-center justify-between gap-4 p-5">
+                  <div className="flex items-center justify-between gap-4 p-4 sm:p-5">
                     <div>
-                      <h3 className="text-xl font-black text-[#171717]">{category.title}</h3>
-                      <p className="mt-2 text-sm text-[#6D6D6D]">{category.count} доступних закладів</p>
+                      <h3 className="theme-text text-lg font-black sm:text-xl">{category.title}</h3>
+                      <p className="theme-text-muted mt-1.5 text-sm sm:mt-2">{category.count} доступних закладів</p>
                     </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#151515] text-[#FFC400]">
-                      <Icon className="h-5 w-5" />
+                    <div className="theme-brand-badge flex h-10 w-10 items-center justify-center rounded-[14px] sm:h-11 sm:w-11 sm:rounded-[16px]">
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                   </div>
                 </Link>
@@ -221,62 +113,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-3 py-8 sm:px-4 sm:py-10">
+      <section className="px-3 py-7 sm:px-4 sm:py-10">
         <div className="container-shell">
-          <div className="mb-6 flex items-end justify-between gap-4">
+          <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
             <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Популярні заклади</div>
-              <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
+              <div className="theme-text-muted text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Популярні заклади</div>
+              <h2 className="theme-text font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
                 Обирайте заклад поруч
               </h2>
             </div>
-            <Link href="/restaurants" className="hidden text-sm font-semibold text-[#171717] md:inline-flex">
+            <Link href="/restaurants" className="theme-text hidden text-sm font-semibold md:inline-flex">
               Усі заклади
             </Link>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {restaurants.map((restaurant, index) => (
+            {restaurants.map((restaurant) => (
               <Link
                 key={restaurant.id}
                 href={`/restaurants/${restaurant.slug}`}
-                className="overflow-hidden rounded-[28px] border border-black/8 bg-white shadow-[0_16px_36px_rgba(0,0,0,0.06)] transition-transform hover:-translate-y-1"
+                className="card-white overflow-hidden rounded-[22px] transition-transform hover:-translate-y-1 sm:rounded-[28px]"
               >
-                <div className="relative h-52">
+                <div className="relative h-44 sm:h-52">
                   <Image
-                    src={
-                      index % 3 === 0
-                        ? "/images/editorial/sushi.jpg"
-                        : index % 3 === 1
-                          ? "/images/editorial/pharmacy.jpg"
-                          : "/images/editorial/grocery.jpg"
-                    }
+                    src={restaurantCardImages[restaurant.category]}
                     alt={restaurant.name}
                     fill
                     className="object-cover"
                     sizes="(max-width: 1280px) 100vw, 33vw"
                   />
-                  <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#171717]">
+                  <div className="theme-surface theme-text absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-bold sm:left-4 sm:top-4 sm:text-xs">
                     {categoryLabels[restaurant.category]}
                   </div>
                 </div>
 
-                <div className="p-5">
+                <div className="p-4 sm:p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-2xl font-black text-[#171717]">{restaurant.name}</h3>
-                      <p className="mt-2 text-sm text-[#6D6D6D]">{restaurant.settlement}</p>
+                      <h3 className="theme-text text-xl font-black sm:text-2xl">{restaurant.name}</h3>
+                      <p className="theme-text-muted mt-1.5 text-sm sm:mt-2">{restaurant.settlement}</p>
                     </div>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        restaurant.isOpenNow ? "bg-emerald-100 text-emerald-700" : "bg-[#F1F1ED] text-[#6D6D6D]"
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-bold sm:px-3 sm:text-xs ${
+                        restaurant.isOpenNow ? "bg-emerald-100 text-emerald-700" : "theme-status-idle"
                       }`}
                     >
                       {restaurant.isOpenNow ? "Відчинено" : "Зачинено"}
                     </span>
                   </div>
 
-                  <div className="mt-4 grid gap-2 text-sm text-[#6D6D6D]">
+                  <div className="theme-text-muted mt-3 grid gap-1.5 text-sm sm:mt-4 sm:gap-2">
                     <div>Доставка: {restaurant.etaMinutes} хв</div>
                     <div>Населений пункт: {restaurant.settlement}</div>
                     <div>
@@ -284,7 +170,7 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#171717]">
+                  <div className="theme-text mt-4 inline-flex items-center gap-2 text-sm font-bold sm:mt-5">
                     Перейти до меню
                     <ArrowRight className="h-4 w-4" />
                   </div>
@@ -295,32 +181,32 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="about" className="px-3 py-8 sm:px-4 sm:py-10">
-        <div className="container-shell overflow-hidden rounded-[32px] bg-white shadow-[0_16px_36px_rgba(0,0,0,0.06)]">
+      <section id="about" className="px-3 py-7 sm:px-4 sm:py-10">
+        <div className="card-white container-shell overflow-hidden rounded-[24px] sm:rounded-[32px]">
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div className="p-6 sm:p-8 lg:p-10">
-              <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Не лише їжа</div>
-              <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
+            <div className="p-5 sm:p-8 lg:p-10">
+              <div className="theme-text-muted text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Не лише їжа</div>
+              <h2 className="theme-text font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
                 Доставка для повсякденних справ
               </h2>
-              <p className="mt-4 text-base leading-7 text-[#6D6D6D]">
+              <p className="theme-text-muted mt-3 text-sm leading-6 sm:mt-4 sm:text-base sm:leading-7">
                 VORON EXPRESS доставляє продукти, ліки, документи, посилки, автозапчастини та інші законні покупки.
               </p>
-              <ul className="mt-6 space-y-3">
+              <ul className="mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
                 {serviceList.map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-semibold text-[#171717]">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#FFC400]" />
+                  <li key={item} className="theme-text flex items-center gap-3 text-sm font-semibold">
+                    <span className="theme-accent-dot h-2.5 w-2.5 rounded-full" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link href="/delivery-zone" className="mt-8 inline-flex rounded-full bg-[#151515] px-5 py-3 text-sm font-bold text-white">
+              <Link href="/delivery-zone" className="theme-dark-action mt-6 px-5 py-3 text-sm font-bold sm:mt-8">
                 Дізнатися більше
               </Link>
             </div>
 
-            <div className="relative min-h-[320px] bg-[#F6F6F4]">
-              <Image src="/images/editorial/grocery.jpg" alt="Доставка продуктів і покупок" fill className="object-cover" />
+            <div className="theme-surface-muted relative min-h-[240px] sm:min-h-[320px]">
+              <Image src="/images/editorial/info sector img.jpg" alt="Доставка для повсякденних справ" fill className="object-cover" />
             </div>
           </div>
         </div>
@@ -328,90 +214,78 @@ export default function HomePage() {
 
       <section className="px-3 py-8 sm:px-4 sm:py-10">
         <div className="container-shell">
-          <div className="mb-6">
-            <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Популярні пропозиції</div>
-            <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
-              Що замовляють зараз
-            </h2>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 [scrollbar-width:none] snap-x snap-mandatory">
-            {popularOffers.map((offer) => (
-              <OfferCard
-                key={offer.product.id}
-                product={offer.product}
-                restaurantName={offer.restaurantName}
-                imageSrc={offer.imageSrc}
-                oldPrice={offer.oldPrice}
-              />
-            ))}
-          </div>
+          <PopularOffersCarousel offers={popularOffers} />
         </div>
       </section>
 
-      <section className="px-3 py-8 sm:px-4 sm:py-10">
-        <div className="container-shell overflow-hidden rounded-[32px] bg-white shadow-[0_16px_36px_rgba(0,0,0,0.06)]">
-          <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Зона доставки</div>
-              <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
-                Перевірте вашу адресу
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-7 text-[#6D6D6D]">
-                Поки що без інтеграції з мапою, але з готовим візуальним блоком та тарифними зонами для наступного етапу.
-              </p>
+      <section className="px-3 py-7 sm:px-4 sm:py-10">
+        <div className="card-white container-shell overflow-hidden rounded-[24px] sm:rounded-[32px]">
+          <div className="grid gap-5 p-5 sm:gap-6 sm:p-8 xl:grid-cols-[0.86fr_1.14fr] xl:items-start">
+            <div className="flex h-full flex-col">
+              <div>
+                <div className="theme-text-muted text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Зона доставки</div>
+                <h2 className="theme-text font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
+                  Перевірте вашу адресу
+                </h2>
+                <p className="theme-text-muted mt-3 max-w-lg text-sm leading-6 sm:mt-4 sm:text-base sm:leading-7">
+                  Чотири тарифні зони з прозорою логікою покриття.
+                </p>
+              </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {deliveryZones.map((zone) => (
+              <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2">
+                {deliveryZoneData.map((zone) => (
                   <Link
-                    key={zone.title}
+                    key={zone.id}
                     href="/delivery-zone"
-                    className="rounded-[22px] bg-[#F6F6F4] p-4 transition-transform duration-200 hover:-translate-y-1"
+                    className="theme-surface-muted flex min-h-[110px] flex-col rounded-[18px] p-4 transition-transform duration-200 hover:-translate-y-1 sm:min-h-[122px] sm:rounded-[22px]"
                   >
-                    <div className="font-black text-[#171717]">{zone.title}</div>
-                    <div className="mt-1 text-sm text-[#6D6D6D]">{zone.note}</div>
-                    <div className="mt-3 text-sm font-semibold text-[#171717]">{zone.price}</div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="theme-text font-black">{zone.title}</div>
+                      <span
+                        className="rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]"
+                        style={{ backgroundColor: `${zone.accent}1f`, color: zone.accent }}
+                      >
+                        {zone.distance}
+                      </span>
+                    </div>
+                    <div className="mt-auto flex items-center justify-between pt-4">
+                      <span className="theme-text text-sm font-black">{zone.priceLabel}</span>
+                      <span className="theme-text-muted text-xs font-semibold">{zone.eta}</span>
+                    </div>
                   </Link>
                 ))}
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button className="rounded-full bg-[#FFC400] px-5 py-3 text-sm font-bold text-[#171717]">Перевірити адресу</button>
-                <Link href="/delivery-zone" className="rounded-full border border-black/8 px-5 py-3 text-sm font-semibold text-[#171717]">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <button className="button-primary w-full text-sm sm:w-auto">
+                  Перевірити адресу
+                </button>
+                <Link
+                  href="/delivery-zone"
+                  className="theme-outline-button inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
+                >
                   Повна сторінка зони доставки
                 </Link>
               </div>
             </div>
 
-            <Link href="/delivery-zone" className="rounded-[28px] bg-[#F6F6F4] p-4">
-              <div className="relative min-h-[340px] overflow-hidden rounded-[24px] bg-white">
-                <div className="accent-grid absolute inset-0 opacity-40" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,196,0,0.16),transparent_22%),radial-gradient(circle_at_70%_35%,rgba(21,21,21,0.08),transparent_24%),radial-gradient(circle_at_46%_78%,rgba(255,196,0,0.1),transparent_20%)]" />
-                {["left-[22%] top-[24%]", "left-[52%] top-[18%]", "left-[34%] top-[58%]", "left-[68%] top-[52%]"].map(
-                  (position, index) => (
-                    <div key={position} className={`absolute ${position}`}>
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#151515] text-white shadow-[0_10px_26px_rgba(0,0,0,0.18)]">
-                        {index + 1}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </Link>
+            <div className="theme-surface rounded-[22px] p-4 sm:rounded-[28px] sm:p-5">
+              <RestaurantsMap restaurants={restaurants} compact framed={false} />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="px-3 py-8 sm:px-4 sm:py-10">
+      <section className="px-3 py-7 sm:px-4 sm:py-10">
         <div className="container-shell">
-          <div className="mb-6 text-center">
-            <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Як це працює</div>
-            <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] text-[#171717] sm:text-4xl">
+          <div className="mb-5 text-center sm:mb-6">
+            <div className="theme-text-muted text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Як це працює</div>
+            <h2 className="theme-text font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
               Замовлення в 4 кроки
             </h2>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 lg:grid-cols-4">
             {steps.map((step, index) => {
               const Icon = step.icon;
 
@@ -419,16 +293,16 @@ export default function HomePage() {
                 <Link
                   key={step.title}
                   href={step.href}
-                  className="relative rounded-[28px] border border-black/8 bg-white p-6 shadow-[0_16px_36px_rgba(0,0,0,0.05)] transition-transform duration-200 hover:-translate-y-1"
+                  className="card-white relative rounded-[22px] p-5 transition-transform duration-200 hover:-translate-y-1 sm:rounded-[28px] sm:p-6"
                 >
                   {index < steps.length - 1 ? (
-                    <div className="absolute right-[-24px] top-10 hidden h-[1px] w-12 bg-[#D9D9D4] lg:block" />
+                    <div className="theme-border absolute right-[-24px] top-10 hidden h-[1px] w-12 border-t lg:block" />
                   ) : null}
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-[#151515] text-[#FFC400]">
+                  <div className="theme-brand-badge flex h-11 w-11 items-center justify-center rounded-[14px] sm:h-12 sm:w-12 sm:rounded-[16px]">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div className="mt-5 text-sm font-semibold uppercase tracking-[0.12em] text-[#6D6D6D]">Крок {index + 1}</div>
-                  <h3 className="mt-2 text-xl font-black text-[#171717]">{step.title}</h3>
+                  <div className="theme-text-muted mt-4 text-xs font-semibold uppercase tracking-[0.12em] sm:mt-5 sm:text-sm">Крок {index + 1}</div>
+                  <h3 className="theme-text mt-2 text-lg font-black sm:text-xl">{step.title}</h3>
                 </Link>
               );
             })}
@@ -436,31 +310,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="contacts" className="px-3 py-8 sm:px-4 sm:py-10">
-        <div className="container-shell overflow-hidden rounded-[32px] bg-[#151515] text-white">
-          <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-10">
+      <section id="contacts" className="px-3 py-7 sm:px-4 sm:py-10">
+        <div className="theme-cta-panel container-shell overflow-hidden rounded-[24px] sm:rounded-[32px]">
+          <div className="grid gap-5 p-5 sm:gap-6 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-10">
             <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.12em] text-[#FFC400]">Швидка заявка</div>
-              <h2 className="font-display mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+              <div className="theme-accent-text text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm">Швидка заявка</div>
+              <h2 className="font-display mt-2 text-[2rem] font-black tracking-[-0.04em] sm:text-4xl">
                 Не знайшли потрібного закладу?
               </h2>
-              <p className="mt-4 max-w-lg text-base leading-7 text-neutral-300">
+              <p className="mt-3 max-w-lg text-sm leading-6 text-neutral-300 sm:mt-4 sm:text-base sm:leading-7">
                 Залиште заявку — ми спробуємо доставити замовлення за вашою адресою.
               </p>
             </div>
 
             <form className="grid gap-3 sm:grid-cols-2">
-              <input className="rounded-[18px] border border-white/10 bg-white/6 px-4 py-4 text-white placeholder:text-neutral-500" placeholder="Ім'я" />
-              <input className="rounded-[18px] border border-white/10 bg-white/6 px-4 py-4 text-white placeholder:text-neutral-500" placeholder="Телефон" />
+              <input className="theme-cta-input rounded-[18px] px-4 py-4" placeholder="Ім'я" />
+              <input className="theme-cta-input rounded-[18px] px-4 py-4" placeholder="Телефон" />
               <input
-                className="rounded-[18px] border border-white/10 bg-white/6 px-4 py-4 text-white placeholder:text-neutral-500 sm:col-span-2"
+                className="theme-cta-input rounded-[18px] px-4 py-4 sm:col-span-2"
                 placeholder="Що потрібно доставити"
               />
               <input
-                className="rounded-[18px] border border-white/10 bg-white/6 px-4 py-4 text-white placeholder:text-neutral-500 sm:col-span-2"
+                className="theme-cta-input rounded-[18px] px-4 py-4 sm:col-span-2"
                 placeholder="Адреса"
               />
-              <button className="rounded-full bg-[#FFC400] px-5 py-4 text-sm font-bold text-[#171717] transition-colors hover:bg-[#EBAF00] sm:col-span-2">
+              <button className="button-primary text-sm sm:col-span-2">
                 Надіслати заявку
               </button>
             </form>

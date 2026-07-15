@@ -26,9 +26,9 @@ export default async function RestaurantPage({
   const restaurantProducts = getRestaurantProducts(restaurant.id);
 
   return (
-    <main className="section-pad">
+    <main className="theme-page section-pad">
       <div className="container-shell">
-        <section className="overflow-hidden rounded-[36px] bg-white shadow-[0_16px_36px_rgba(0,0,0,0.06)]">
+        <section className="card-white overflow-hidden rounded-[36px]">
           <div className="placeholder-image flex min-h-[360px] items-end p-6 text-white sm:p-8">
             <div className="relative z-10 max-w-xl">
               <div className="text-xs uppercase tracking-[0.22em] text-[#FFE38C]">{restaurant.coverLabel}</div>
@@ -37,16 +37,16 @@ export default async function RestaurantPage({
             </div>
           </div>
 
-          <div className="grid gap-4 p-6 text-sm text-[#6D6D6D] sm:grid-cols-3">
+          <div className="theme-text-muted grid gap-4 p-6 text-sm sm:grid-cols-3">
             <div className="flex items-center gap-3">
-              <MapPin className="h-4 w-4 text-[#FFC400]" />
+              <MapPin className="theme-accent-text h-4 w-4" />
               {restaurant.address}
             </div>
             <div className="flex items-center gap-3">
-              <Clock3 className="h-4 w-4 text-[#FFC400]" />
+              <Clock3 className="theme-accent-text h-4 w-4" />
               {restaurant.etaMinutes} хв доставка
             </div>
-            <div className="font-bold text-[#171717]">{restaurant.isOpenNow ? "Відчинено зараз" : "Тимчасово зачинено"}</div>
+            <div className="theme-text font-bold">{restaurant.isOpenNow ? "Відчинено зараз" : "Тимчасово зачинено"}</div>
           </div>
         </section>
 
@@ -58,7 +58,7 @@ export default async function RestaurantPage({
           />
           <div className="mt-6 flex flex-wrap gap-3">
             {categories.map((category) => (
-              <span key={category.id} className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-bold text-[#171717]">
+              <span key={category.id} className="theme-outline-button theme-text rounded-full px-4 py-2 text-sm font-bold">
                 {category.name}
               </span>
             ))}
@@ -73,7 +73,7 @@ export default async function RestaurantPage({
 
         <Link
           href="/cart"
-          className="fixed bottom-4 left-4 right-4 z-30 flex items-center justify-center gap-3 rounded-full bg-[#FFC400] px-5 py-4 text-sm font-black text-[#171717] shadow-2xl md:hidden"
+          className="theme-accent-bg fixed bottom-4 left-4 right-4 z-30 flex items-center justify-center gap-3 rounded-full px-5 py-4 text-sm font-black shadow-2xl md:hidden"
         >
           <ShoppingBag className="h-4 w-4" />
           Перейти до кошика

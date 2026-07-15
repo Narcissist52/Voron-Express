@@ -13,6 +13,7 @@ export const deliveryZones: DeliveryZone[] = [
     distance: "до 2 км",
     eta: "15-25 хв",
     priceLabel: "від 69 грн",
+    priceCents: 6900,
     accent: "#f4c430",
     description: "Центр міста, швидкий виїзд кур'єра та найкоротші маршрути."
   },
@@ -22,6 +23,7 @@ export const deliveryZones: DeliveryZone[] = [
     distance: "2-5 км",
     eta: "25-40 хв",
     priceLabel: "від 89 грн",
+    priceCents: 8900,
     accent: "#f1b71b",
     description: "Щільна міська забудова та стабільне покриття протягом дня."
   },
@@ -31,6 +33,7 @@ export const deliveryZones: DeliveryZone[] = [
     distance: "5-8 км",
     eta: "40-55 хв",
     priceLabel: "від 119 грн",
+    priceCents: 11900,
     accent: "#dd9d11",
     description: "Околиці та приватний сектор з точковою доставкою за графіком."
   },
@@ -40,6 +43,7 @@ export const deliveryZones: DeliveryZone[] = [
     distance: "8+ км",
     eta: "55-75 хв",
     priceLabel: "за погодженням",
+    priceCents: null,
     accent: "#c88608",
     description: "Індивідуальний тариф для дальніх адрес та об'ємних замовлень."
   }

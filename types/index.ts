@@ -12,6 +12,7 @@ export type DeliveryZone = {
   distance: string;
   eta: string;
   priceLabel: string;
+  priceCents: number | null;
   accent: string;
   description: string;
 };
@@ -65,7 +66,32 @@ export type CartItem = {
   quantity: number;
 };
 
+export type PaymentMethod = "cash" | "card_transfer";
+
 export type OrderStatus = "new" | "confirmed" | "on_the_way" | "completed";
+
+export type OrderLine = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
+export type CreateOrderPayload = {
+  customerName: string;
+  phone: string;
+  address: string;
+  comment: string;
+  paymentMethod: PaymentMethod;
+  restaurantId: string;
+  restaurantName: string;
+  subtotal: number;
+  deliveryZoneId: string | null;
+  deliveryZoneTitle: string | null;
+  deliveryFee: number | null;
+  total: number;
+  items: OrderLine[];
+};
 
 export type AdminOrder = {
   id: string;
@@ -74,4 +100,11 @@ export type AdminOrder = {
   total: number;
   createdAt: string;
   status: OrderStatus;
+  phone?: string;
+  address?: string;
+  comment?: string;
+  paymentMethod?: PaymentMethod;
+  deliveryFee?: number;
+  deliveryZoneTitle?: string;
+  items?: OrderLine[];
 };

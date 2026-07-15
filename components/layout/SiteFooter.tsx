@@ -1,14 +1,15 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/layout/BrandLogo";
+
 export function SiteFooter() {
   return (
-    <footer className="mt-8 bg-[#151515] py-14 text-white">
+    <footer className="theme-footer mt-8 py-14">
       <div className="container-shell grid gap-10 md:grid-cols-[1.35fr_1fr_1fr]">
         <div className="max-w-md">
-          <div className="font-display text-lg font-black uppercase tracking-[0.18em]">VORON EXPRESS</div>
+          <BrandLogo className="h-14" />
           <p className="mt-4 text-sm leading-6 text-neutral-400">
-            Доставка для Воронькова та Бориспільського району: заклади, аптеки, магазини та інші потрібні покупки
-            поруч.
+            Доставка для Воронькова та Бориспільського району: заклади, аптеки, магазини та інші потрібні покупки поруч.
           </p>
           <p className="mt-6 text-sm text-neutral-400">© 2026 VORON EXPRESS</p>
         </div>

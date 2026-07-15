@@ -12,12 +12,12 @@ export function QuantitySelector({
   onIncrease
 }: QuantitySelectorProps) {
   return (
-    <div className="inline-flex items-center rounded-full border border-black/10 bg-white">
-      <button className="h-10 w-10 text-lg font-bold text-neutral-700" onClick={onDecrease} type="button">
+    <div className="theme-outline-button inline-flex items-center rounded-full border">
+      <button className="theme-text-muted h-10 w-10 text-lg font-bold" onClick={onDecrease} type="button">
         -
       </button>
-      <span className="min-w-8 text-center text-sm font-bold text-neutral-900">{value}</span>
-      <button className="h-10 w-10 text-lg font-bold text-neutral-700" onClick={onIncrease} type="button">
+      <span className="theme-text min-w-8 text-center text-sm font-bold">{value}</span>
+      <button className="theme-text-muted h-10 w-10 text-lg font-bold" onClick={onIncrease} type="button">
         +
       </button>
     </div>

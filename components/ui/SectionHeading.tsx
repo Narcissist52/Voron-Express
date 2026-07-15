@@ -20,13 +20,13 @@ export function SectionHeading({
       {eyebrow ? <span className="eyebrow">{eyebrow}</span> : null}
       <h2
         className={`font-display mt-5 text-3xl font-black tracking-[-0.04em] sm:text-4xl ${
-          isDark ? "text-white" : "text-[#171717]"
+          isDark ? "text-white" : "theme-text"
         }`}
       >
         {title}
       </h2>
       {description ? (
-        <p className={`font-ui mt-4 text-base leading-7 ${isDark ? "text-neutral-300" : "text-[#6D6D6D]"}`}>
+        <p className={`font-ui mt-4 text-base leading-7 ${isDark ? "text-neutral-300" : "theme-text-muted"}`}>
           {description}
         </p>
       ) : null}

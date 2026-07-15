@@ -6,11 +6,21 @@ import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
-import { restaurants } from "@/data/mock-data";
+import { deliveryZones, restaurants } from "@/data/mock-data";
+import { getDeliveryZoneById, getOrderTotalCents } from "@/lib/delivery";
 import { formatMoney } from "@/lib/format";
 
 export default function CartPage() {
-  const { items, restaurantId, subtotal, updateQuantity, removeItem } = useCart();
+  const {
+    items,
+    restaurantId,
+    deliveryZoneId,
+    subtotal,
+    deliveryFee,
+    updateQuantity,
+    removeItem,
+    setDeliveryZoneId
+  } = useCart();
 
   if (items.length === 0) {
     return (
@@ -26,14 +36,16 @@ export default function CartPage() {
   }
 
   const restaurant = restaurants.find((item) => item.id === restaurantId);
+  const selectedZone = getDeliveryZoneById(deliveryZoneId);
+  const total = getOrderTotalCents(subtotal, deliveryFee);
 
   return (
-    <main className="section-pad">
+    <main className="theme-page section-pad">
       <div className="container-shell grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
         <section>
-          <h1 className="font-display text-4xl font-black tracking-[-0.04em] text-[#171717]">Кошик</h1>
-          <p className="mt-3 text-base leading-7 text-[#6D6D6D]">
-            Замовлення з одного закладу: <span className="font-bold text-[#171717]">{restaurant?.name}</span>
+          <h1 className="theme-text font-display text-4xl font-black tracking-[-0.04em]">Кошик</h1>
+          <p className="theme-text-muted mt-3 text-base leading-7">
+            Замовлення з одного закладу: <span className="theme-text font-bold">{restaurant?.name}</span>
           </p>
 
           <div className="mt-8 space-y-4">
@@ -41,8 +53,8 @@ export default function CartPage() {
               <article key={item.productId} className="card-white rounded-[28px] p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-xl font-black text-[#171717]">{item.name}</h2>
-                    <p className="mt-2 text-sm text-[#6D6D6D]">{formatMoney(item.price)} за позицію</p>
+                    <h2 className="theme-text text-xl font-black">{item.name}</h2>
+                    <p className="theme-text-muted mt-2 text-sm">{formatMoney(item.price)} за позицію</p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
@@ -51,11 +63,12 @@ export default function CartPage() {
                       onDecrease={() => updateQuantity(item.productId, item.quantity - 1)}
                       onIncrease={() => updateQuantity(item.productId, item.quantity + 1)}
                     />
-                    <div className="min-w-28 text-right text-lg font-black text-[#171717]">{formatMoney(item.price * item.quantity)}</div>
+                    <div className="theme-text min-w-28 text-right text-lg font-black">{formatMoney(item.price * item.quantity)}</div>
                     <button
                       type="button"
                       onClick={() => removeItem(item.productId)}
-                      className="rounded-full border border-black/10 p-3 text-[#6D6D6D]"
+                      className="theme-outline-button theme-text-muted rounded-full p-3"
+                      aria-label={`Видалити ${item.name}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -67,17 +80,53 @@ export default function CartPage() {
         </section>
 
         <aside className="card-white h-fit rounded-[32px] p-6">
-          <h2 className="text-2xl font-black text-[#171717]">Підсумок</h2>
+          <h2 className="theme-text text-2xl font-black">Підсумок</h2>
+
+          <label className="mt-6 block">
+            <span className="theme-text mb-2 block text-sm font-bold">Зона доставки</span>
+            <select
+              value={deliveryZoneId ?? ""}
+              onChange={(event) => setDeliveryZoneId(event.target.value || null)}
+              className="theme-input w-full rounded-[18px] px-4 py-4"
+            >
+              <option value="">Оберіть зону доставки</option>
+              {deliveryZones.map((zone) => (
+                <option key={zone.id} value={zone.id}>
+                  {zone.title} · {zone.distance} · {zone.priceLabel}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {selectedZone ? (
+            <div className="theme-surface-muted theme-text-muted mt-4 rounded-[22px] p-4 text-sm leading-6">
+              <div className="theme-text font-bold">{selectedZone.title}</div>
+              <div>{selectedZone.eta}</div>
+              <div>{selectedZone.description}</div>
+            </div>
+          ) : null}
+
           <div className="mt-6 space-y-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[#6D6D6D]">Проміжна сума</span>
-              <span className="font-black text-[#171717]">{formatMoney(subtotal)}</span>
+              <span className="theme-text-muted">Проміжна сума</span>
+              <span className="theme-text font-black">{formatMoney(subtotal)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[#6D6D6D]">Доставка</span>
-              <span className="font-bold text-[#171717]">Уточнити в оператора</span>
+            <div className="flex items-center justify-between gap-4">
+              <span className="theme-text-muted">Доставка</span>
+              <span className="theme-text text-right font-bold">
+                {deliveryZoneId ? (deliveryFee === null ? "За погодженням" : formatMoney(deliveryFee)) : "Оберіть зону"}
+              </span>
+            </div>
+            <div className="theme-border border-t pt-4">
+              <div className="flex items-center justify-between">
+                <span className="theme-text text-base font-bold">Разом</span>
+                <span className="theme-text text-2xl font-black">
+                  {deliveryZoneId && deliveryFee === null ? `${formatMoney(subtotal)} + доставка` : formatMoney(total)}
+                </span>
+              </div>
             </div>
           </div>
+
           <Link href="/checkout" className="button-primary mt-8 w-full">
             Перейти до оформлення
           </Link>

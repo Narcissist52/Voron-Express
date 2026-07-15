@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MapPinned, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
+import { RestaurantsMap } from "@/components/maps/RestaurantsMap";
 import { RestaurantCard } from "@/components/ui/RestaurantCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { restaurants } from "@/data/mock-data";
@@ -45,9 +46,9 @@ export function RestaurantsClientPage({
   }, [activeCategory, openNowOnly, query]);
 
   return (
-    <main className="section-pad">
+    <main className="theme-page section-pad">
       <div className="container-shell">
-        <section className="rounded-[32px] bg-white p-6 shadow-[0_16px_36px_rgba(0,0,0,0.06)] sm:p-8">
+        <section className="card-white rounded-[32px] p-6 sm:p-8">
           <SectionHeading
             eyebrow="Каталог"
             title="Заклади для швидкого локального замовлення"
@@ -55,8 +56,8 @@ export function RestaurantsClientPage({
           />
 
           <div className="mt-8 grid gap-4 xl:grid-cols-[1fr_auto_auto]">
-            <label className="flex items-center gap-3 rounded-[22px] border border-black/8 bg-[#F6F6F4] px-4 py-4">
-              <Search className="h-4 w-4 text-[#6D6D6D]" />
+            <label className="theme-input flex items-center gap-3 rounded-[22px] px-4 py-4">
+              <Search className="theme-text-muted h-4 w-4" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -69,20 +70,20 @@ export function RestaurantsClientPage({
               type="button"
               onClick={() => setOpenNowOnly((value) => !value)}
               className={`rounded-[22px] px-5 py-4 text-sm font-bold ${
-                openNowOnly ? "bg-[#FFC400] text-[#171717]" : "border border-black/8 bg-white text-[#171717]"
+                openNowOnly ? "theme-accent-bg" : "theme-outline-button"
               }`}
             >
               Відчинено зараз
             </button>
 
-            <div className="inline-flex rounded-[22px] bg-[#F1F1ED] p-1">
+            <div className="theme-surface-muted inline-flex rounded-[22px] p-1">
               {(["list", "map"] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => setViewMode(mode)}
                   className={`rounded-[18px] px-4 py-3 text-sm font-bold ${
-                    viewMode === mode ? "bg-[#151515] text-white" : "text-[#6D6D6D]"
+                    viewMode === mode ? "bg-[#151515] text-white" : "theme-text-muted"
                   }`}
                 >
                   {mode === "list" ? "Список" : "Мапа"}
@@ -100,7 +101,7 @@ export function RestaurantsClientPage({
                 className={`rounded-full px-4 py-2 text-sm font-bold ${
                   activeCategory === category
                     ? "bg-[#151515] text-white"
-                    : "border border-black/8 bg-white text-[#6D6D6D]"
+                    : "theme-outline-button theme-text-muted"
                 }`}
               >
                 {categoryLabels[category]}
@@ -116,35 +117,7 @@ export function RestaurantsClientPage({
             ))}
           </div>
 
-          <div className="rounded-[32px] bg-white p-5 shadow-[0_16px_36px_rgba(0,0,0,0.06)]">
-            <div className="relative min-h-[500px] overflow-hidden rounded-[26px] bg-[#F6F6F4] p-6">
-              <div className="accent-grid absolute inset-0 opacity-35" />
-              <div className="relative z-10 rounded-[26px] bg-white/88 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.05)]">
-                <div className="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.18em] text-[#6D6D6D]">
-                  <MapPinned className="h-4 w-4 text-[#FFC400]" />
-                  Умовна мапа
-                </div>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-[#6D6D6D]">
-                  {viewMode === "map"
-                    ? "Режим мапи активний. Тут пізніше можна підключити реальні позначки закладів."
-                    : "Блок мапи лишається видимим і в режимі списку, щоб структура сторінки вже працювала як маркетплейс."}
-                </p>
-              </div>
-
-              {[
-                "left-[18%] top-[24%]",
-                "left-[58%] top-[18%]",
-                "left-[32%] top-[54%]",
-                "left-[66%] top-[60%]"
-              ].map((position, index) => (
-                <div key={position} className={`absolute ${position} z-10`}>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#151515] text-sm font-bold text-white shadow-[0_10px_26px_rgba(0,0,0,0.15)]">
-                    {index + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RestaurantsMap restaurants={viewMode === "map" ? filtered : filtered.slice(0, Math.max(filtered.length, 1))} compact />
         </section>
       </div>
     </main>
