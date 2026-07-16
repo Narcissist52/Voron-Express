@@ -5,6 +5,7 @@ import {
   getAdminSessionCookieName,
   getAdminSessionMaxAge,
   isAdminAuthConfigured,
+  shouldUseSecureAdminCookie,
   validateAdminCredentials
 } from "@/lib/admin-auth";
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       value: createAdminSession(email),
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: shouldUseSecureAdminCookie(),
       path: "/",
       maxAge: getAdminSessionMaxAge()
     });

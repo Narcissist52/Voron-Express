@@ -129,3 +129,13 @@ export function getAdminSessionCookieName() {
 export function getAdminSessionMaxAge() {
   return SESSION_MAX_AGE;
 }
+
+export function shouldUseSecureAdminCookie() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+
+  if (siteUrl.startsWith("https://")) {
+    return true;
+  }
+
+  return false;
+}
