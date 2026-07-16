@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { restaurants } from "@/data/mock-data";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function AdminRestaurantDetailsPage({
   params
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdminSession();
   const { id } = await params;
   const restaurant = restaurants.find((item) => item.id === id);
 

@@ -2,8 +2,11 @@ import Link from "next/link";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { restaurants } from "@/data/mock-data";
+import { requireAdminSession } from "@/lib/admin-auth";
 
-export default function AdminRestaurantsPage() {
+export default async function AdminRestaurantsPage() {
+  await requireAdminSession();
+
   return (
     <AdminShell
       title="Заклади"

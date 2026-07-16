@@ -1,21 +1,14 @@
 import { AdminShell } from "@/components/admin/AdminShell";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 function RestaurantForm() {
   return (
     <form className="grid gap-4 md:grid-cols-2">
-      {[
-        "Назва",
-        "Опис",
-        "Адреса",
-        "Телефон",
-        "Графік",
-        "Зображення",
-        "Latitude",
-        "Longitude",
-        "googlePlaceId"
-      ].map((field) => (
-        <input key={field} className="rounded-2xl border border-black/10 px-4 py-4" placeholder={field} />
-      ))}
+      {["Назва", "Опис", "Адреса", "Телефон", "Графік", "Зображення", "Latitude", "Longitude", "googlePlaceId"].map(
+        (field) => (
+          <input key={field} className="rounded-2xl border border-black/10 px-4 py-4" placeholder={field} />
+        )
+      )}
       <label className="flex items-center gap-3 rounded-2xl border border-black/10 bg-[#f8f5ec] px-4 py-4 md:col-span-2">
         <input type="checkbox" defaultChecked />
         <span className="text-sm font-semibold">Заклад активний</span>
@@ -27,7 +20,9 @@ function RestaurantForm() {
   );
 }
 
-export default function AdminNewRestaurantPage() {
+export default async function AdminNewRestaurantPage() {
+  await requireAdminSession();
+
   return (
     <AdminShell
       title="Новий заклад"

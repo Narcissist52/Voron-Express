@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getRestaurantCategories, getRestaurantProducts, restaurants } from "@/data/mock-data";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { formatMoney } from "@/lib/format";
 
 export default async function AdminRestaurantMenuPage({
@@ -9,6 +10,7 @@ export default async function AdminRestaurantMenuPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdminSession();
   const { id } = await params;
   const restaurant = restaurants.find((item) => item.id === id);
 

@@ -1,20 +1,22 @@
-import { AdminShell } from "@/components/admin/AdminShell";
+import { redirect } from "next/navigation";
 
-export default function AdminLoginPage() {
+import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { getAdminSession } from "@/lib/admin-auth";
+
+export default async function AdminLoginPage() {
+  const session = await getAdminSession();
+
+  if (session) {
+    redirect("/admin");
+  }
+
   return (
     <AdminShell
       title="Логін адміністратора"
-      description="Сторінка поки що виконує роль візуальної заглушки без реальної авторизації."
+      description="Увійдіть в адмінку через email і пароль. Прямий доступ до службових сторінок без авторизації заблокований."
     >
-      <div className="max-w-lg rounded-[32px] bg-white p-6 shadow-sm">
-        <form className="grid gap-4">
-          <input className="rounded-2xl border border-black/10 px-4 py-4" placeholder="Email" />
-          <input type="password" className="rounded-2xl border border-black/10 px-4 py-4" placeholder="Пароль" />
-          <button type="button" className="rounded-2xl bg-neutral-950 px-5 py-4 font-bold text-white">
-            Увійти
-          </button>
-        </form>
-      </div>
+      <AdminLoginForm />
     </AdminShell>
   );
 }
