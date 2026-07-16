@@ -1,17 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
 import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
 import { formatMoney } from "@/lib/format";
-import { readStoredOrders } from "@/lib/orders";
 import type { AdminOrder } from "@/types";
 
-export function AdminOrdersClient({ initialOrders }: { initialOrders: AdminOrder[] }) {
-  const [storedOrders] = useState<AdminOrder[]>(() => readStoredOrders());
-
-  const orders = useMemo(() => [...storedOrders, ...initialOrders], [initialOrders, storedOrders]);
-
+export function AdminOrdersClient({ orders }: { orders: AdminOrder[] }) {
   return (
     <div className="rounded-[28px] bg-white p-6 shadow-sm">
       <div className="overflow-x-auto">

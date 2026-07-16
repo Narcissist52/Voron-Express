@@ -9,8 +9,10 @@ import "./globals.css";
 
 const siteDescription =
   "Локальна служба доставки VORON EXPRESS для Воронькова та Бориспільського району: заклади, аптеки, магазини та швидке оформлення замовлення.";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://91.234.2.34:8000";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "VORON EXPRESS",
   description: siteDescription,
   icons: {

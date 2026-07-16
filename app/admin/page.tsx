@@ -1,14 +1,17 @@
 import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { adminOrders, restaurants } from "@/data/mock-data";
+import { restaurants } from "@/data/mock-data";
+import { readAllOrders } from "@/lib/order-store";
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const orders = await readAllOrders();
+
   return (
     <AdminShell
       title="Дашборд"
-      description="Операційна панель з моковими даними для швидкого перегляду активності сервісу."
+      description="Операційна панель для швидкого перегляду активності сервісу та актуальних замовлень."
     >
-      <AdminDashboardClient initialOrders={adminOrders} restaurants={restaurants} />
+      <AdminDashboardClient orders={orders} restaurants={restaurants} />
     </AdminShell>
   );
 }

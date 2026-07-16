@@ -1,14 +1,16 @@
 import { AdminOrdersClient } from "@/components/admin/AdminOrdersClient";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { adminOrders } from "@/data/mock-data";
+import { readAllOrders } from "@/lib/order-store";
 
-export default function AdminOrdersPage() {
+export default async function AdminOrdersPage() {
+  const orders = await readAllOrders();
+
   return (
     <AdminShell
       title="Замовлення"
       description="Таблиця замовлень та статусів, готова для подальшого підключення real-time оновлень або API."
     >
-      <AdminOrdersClient initialOrders={adminOrders} />
+      <AdminOrdersClient orders={orders} />
     </AdminShell>
   );
 }

@@ -16,16 +16,22 @@ type SubmitState = {
   telegramDelivered: boolean;
 };
 
+function normalizePhone(value: string) {
+  const cleaned = value.replace(/[^\d+]/g, "");
+
+  if (cleaned.startsWith("+")) {
+    return `+${cleaned.slice(1).replace(/\D/g, "")}`;
+  }
+
+  return cleaned.replace(/\D/g, "");
+}
+
+function isValidPhone(value: string) {
+  return /^(\+380\d{9}|380\d{9}|0\d{9})$/.test(value);
+}
+
 export default function CheckoutPage() {
-  const {
-    items,
-    restaurantId,
-    deliveryZoneId,
-    subtotal,
-    deliveryFee,
-    clearCart,
-    setDeliveryZoneId
-  } = useCart();
+  const { items, restaurantId, deliveryZoneId, subtotal, deliveryFee, clearCart, setDeliveryZoneId } = useCart();
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -51,8 +57,8 @@ export default function CheckoutPage() {
             </p>
             <p className="theme-text-muted mx-auto mt-3 max-w-2xl text-sm leading-6">
               {submitState.telegramDelivered
-                ? "Сповіщення вже надіслано в Telegram-бот."
-                : "Замовлення збережено локально. Telegram можна підключити одразу, щойно будуть додані серверні змінні середовища."}
+                ? "Сповіщення вже надіслано в Telegram."
+                : "Замовлення створено. Telegram-сповіщення запрацюють одразу після додавання серверних змінних середовища."}
             </p>
             <Link href="/restaurants" className="button-primary mt-8">
               Повернутися до каталогу
@@ -67,7 +73,10 @@ export default function CheckoutPage() {
     return (
       <main className="theme-page section-pad">
         <div className="container-shell">
-          <EmptyState title="Немає товарів для оформлення" description="Спочатку додайте хоча б одну позицію до кошика." />
+          <EmptyState
+            title="Немає товарів для оформлення"
+            description="Спочатку додайте хоча б одну позицію до кошика."
+          />
         </div>
       </main>
     );
@@ -76,12 +85,33 @@ export default function CheckoutPage() {
   const restaurant = restaurants.find((item) => item.id === restaurantId);
   const selectedZone = getDeliveryZoneById(deliveryZoneId);
   const total = getOrderTotalCents(subtotal, deliveryFee);
+  const minOrderReached = !restaurant?.minOrderCents || subtotal >= restaurant.minOrderCents;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const normalizedName = customerName.trim();
+    const normalizedPhone = normalizePhone(phone);
+    const normalizedAddress = address.trim();
+    const normalizedComment = comment.trim();
+
     if (!restaurant) {
       setErrorMessage("Не вдалося визначити заклад для замовлення.");
+      return;
+    }
+
+    if (normalizedName.length < 2) {
+      setErrorMessage("Вкажіть ім'я для оформлення замовлення.");
+      return;
+    }
+
+    if (!isValidPhone(normalizedPhone)) {
+      setErrorMessage("Вкажіть коректний номер телефону у форматі +380XXXXXXXXX або 0XXXXXXXXX.");
+      return;
+    }
+
+    if (normalizedAddress.length < 8) {
+      setErrorMessage("Вкажіть точну адресу доставки.");
       return;
     }
 
@@ -90,14 +120,19 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (restaurant.minOrderCents && subtotal < restaurant.minOrderCents) {
+      setErrorMessage(`Мінімальне замовлення для ${restaurant.name} — ${formatMoney(restaurant.minOrderCents)}.`);
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage("");
 
     const payload: CreateOrderPayload = {
-      customerName,
-      phone,
-      address,
-      comment,
+      customerName: normalizedName,
+      phone: normalizedPhone,
+      address: normalizedAddress,
+      comment: normalizedComment,
       paymentMethod,
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,
@@ -153,7 +188,8 @@ export default function CheckoutPage() {
         <section className="card-white rounded-[32px] p-6 sm:p-8">
           <h1 className="theme-text font-display text-4xl font-black tracking-[-0.04em]">Оформлення</h1>
           <p className="theme-text-muted mt-3 max-w-2xl text-base leading-7">
-            Замовлення надійде власнику в Telegram. Поки що доступна оплата готівкою або переказом на картку після підтвердження.
+            Замовлення надійде власнику в Telegram. Поки що доступна оплата готівкою або переказом на картку після
+            підтвердження.
           </p>
 
           <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
@@ -162,13 +198,16 @@ export default function CheckoutPage() {
               value={customerName}
               onChange={(event) => setCustomerName(event.target.value)}
               className="theme-input rounded-[18px] px-4 py-4"
+              autoComplete="name"
               placeholder="Ім'я"
             />
             <input
               required
+              type="tel"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               className="theme-input rounded-[18px] px-4 py-4"
+              autoComplete="tel"
               placeholder="Телефон"
             />
             <input
@@ -176,6 +215,7 @@ export default function CheckoutPage() {
               value={address}
               onChange={(event) => setAddress(event.target.value)}
               className="theme-input rounded-[18px] px-4 py-4"
+              autoComplete="street-address"
               placeholder="Адреса доставки"
             />
 
@@ -200,6 +240,17 @@ export default function CheckoutPage() {
               placeholder="Що ще важливо для доставки"
             />
 
+            <div className="theme-text-muted rounded-[18px] bg-black/[0.03] px-4 py-3 text-sm">
+              {restaurant?.minOrderCents ? (
+                <span>
+                  Мінімальне замовлення: <span className="theme-text font-semibold">{formatMoney(restaurant.minOrderCents)}</span>.
+                  {!minOrderReached ? ` Зараз у кошику ${formatMoney(subtotal)}.` : " Мінімальна сума вже досягнута."}
+                </span>
+              ) : (
+                <span>Перед відправкою перевірте адресу, телефон та склад замовлення.</span>
+              )}
+            </div>
+
             <select
               value={paymentMethod}
               onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
@@ -215,7 +266,7 @@ export default function CheckoutPage() {
               </div>
             ) : null}
 
-            <button type="submit" className="button-primary mt-2" disabled={isSubmitting}>
+            <button type="submit" className="button-primary mt-2" disabled={isSubmitting || !minOrderReached}>
               {isSubmitting ? "Надсилаємо..." : "Підтвердити замовлення"}
             </button>
           </form>
@@ -227,7 +278,10 @@ export default function CheckoutPage() {
 
           <div className="mt-6 space-y-3">
             {items.map((item) => (
-              <div key={item.productId} className="flex items-center justify-between gap-4 border-b border-white/8 pb-3 text-sm text-neutral-200">
+              <div
+                key={item.productId}
+                className="flex items-center justify-between gap-4 border-b border-white/8 pb-3 text-sm text-neutral-200"
+              >
                 <span>
                   {item.name} × {item.quantity}
                 </span>

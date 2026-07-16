@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-import type { AdminOrder, CreateOrderPayload } from "@/types";
+import { products, restaurants } from "@/data/mock-data";
+import { getDeliveryZoneById, getOrderTotalCents } from "@/lib/delivery";
+import { appendPersistedOrder } from "@/lib/order-store";
+import type { AdminOrder, CreateOrderPayload, OrderLine, PaymentMethod } from "@/types";
 
 function formatClock(date: Date) {
   return new Intl.DateTimeFormat("uk-UA", {
@@ -11,8 +14,14 @@ function formatClock(date: Date) {
 }
 
 function buildOrderId(date: Date) {
-  const timestamp = `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`.padStart(6, "0");
-  return `VE-${timestamp}`;
+  const datePart = new Intl.DateTimeFormat("uk-UA", {
+    day: "2-digit",
+    month: "2-digit"
+  })
+    .format(date)
+    .replace(".", "");
+  const timePart = `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`.padStart(6, "0");
+  return `VE-${datePart}-${timePart}`;
 }
 
 function formatMoney(value: number) {
@@ -21,6 +30,24 @@ function formatMoney(value: number) {
     currency: "UAH",
     maximumFractionDigits: 0
   }).format(value / 100);
+}
+
+function normalizeText(value: string | null | undefined) {
+  return value?.trim() ?? "";
+}
+
+function normalizePhone(value: string | null | undefined) {
+  const cleaned = (value ?? "").replace(/[^\d+]/g, "");
+
+  if (cleaned.startsWith("+")) {
+    return `+${cleaned.slice(1).replace(/\D/g, "")}`;
+  }
+
+  return cleaned.replace(/\D/g, "");
+}
+
+function isValidPhone(value: string) {
+  return /^(\+380\d{9}|380\d{9}|0\d{9})$/.test(value);
 }
 
 function buildTelegramMessage(order: AdminOrder) {
@@ -71,30 +98,127 @@ async function sendTelegramNotification(order: AdminOrder) {
   return response.ok;
 }
 
+function validatePaymentMethod(value: string): value is PaymentMethod {
+  return value === "cash" || value === "card_transfer";
+}
+
+function buildValidatedItems(rawItems: OrderLine[]) {
+  const normalizedItems = rawItems
+    .map((item) => ({
+      productId: normalizeText(item.productId),
+      quantity: Number(item.quantity)
+    }))
+    .filter((item) => item.productId && Number.isFinite(item.quantity) && item.quantity > 0);
+
+  if (normalizedItems.length === 0) {
+    return null;
+  }
+
+  const validatedItems = normalizedItems
+    .map((item) => {
+      const product = products.find((entry) => entry.id === item.productId);
+
+      if (!product) {
+        return null;
+      }
+
+      return {
+        productId: product.id,
+        restaurantId: product.restaurantId,
+        name: product.name,
+        price: product.price,
+        quantity: item.quantity
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  return validatedItems.length > 0 ? validatedItems : null;
+}
+
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as CreateOrderPayload;
 
-    if (!payload.customerName || !payload.phone || !payload.address || !payload.restaurantName || payload.items.length === 0) {
-      return NextResponse.json({ ok: false, error: "Недостатньо даних для замовлення." }, { status: 400 });
+    const customerName = normalizeText(payload.customerName);
+    const phone = normalizePhone(payload.phone);
+    const address = normalizeText(payload.address);
+    const comment = normalizeText(payload.comment);
+
+    if (customerName.length < 2) {
+      return NextResponse.json({ ok: false, error: "Вкажіть ім'я для оформлення замовлення." }, { status: 400 });
     }
 
+    if (!isValidPhone(phone)) {
+      return NextResponse.json({ ok: false, error: "Вкажіть коректний номер телефону." }, { status: 400 });
+    }
+
+    if (address.length < 8) {
+      return NextResponse.json({ ok: false, error: "Вкажіть точну адресу доставки." }, { status: 400 });
+    }
+
+    if (!validatePaymentMethod(payload.paymentMethod)) {
+      return NextResponse.json({ ok: false, error: "Оберіть спосіб оплати." }, { status: 400 });
+    }
+
+    const restaurant = restaurants.find((item) => item.id === payload.restaurantId);
+
+    if (!restaurant || !restaurant.active) {
+      return NextResponse.json({ ok: false, error: "Заклад для замовлення не знайдено." }, { status: 400 });
+    }
+
+    const items = buildValidatedItems(payload.items);
+
+    if (!items) {
+      return NextResponse.json({ ok: false, error: "Додайте хоча б одну коректну позицію до кошика." }, { status: 400 });
+    }
+
+    const restaurantItems = items.filter((item) => item.restaurantId === restaurant.id);
+
+    if (restaurantItems.length !== items.length) {
+      return NextResponse.json({ ok: false, error: "У замовленні не можна змішувати товари з різних закладів." }, { status: 400 });
+    }
+
+    const subtotal = restaurantItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    if (restaurant.minOrderCents && subtotal < restaurant.minOrderCents) {
+      return NextResponse.json(
+        { ok: false, error: `Мінімальне замовлення для ${restaurant.name} — ${formatMoney(restaurant.minOrderCents)}.` },
+        { status: 400 }
+      );
+    }
+
+    const selectedZone = getDeliveryZoneById(payload.deliveryZoneId);
+
+    if (!selectedZone) {
+      return NextResponse.json({ ok: false, error: "Оберіть зону доставки перед оформленням." }, { status: 400 });
+    }
+
+    const deliveryFee = selectedZone.priceCents;
+    const total = getOrderTotalCents(subtotal, deliveryFee);
     const createdAt = new Date();
+
     const order: AdminOrder = {
       id: buildOrderId(createdAt),
-      customerName: payload.customerName,
-      restaurantName: payload.restaurantName,
-      total: payload.total,
+      customerName,
+      restaurantName: restaurant.name,
+      total,
       createdAt: formatClock(createdAt),
       status: "new",
-      phone: payload.phone,
-      address: payload.address,
-      comment: payload.comment,
+      phone,
+      address,
+      comment: comment || undefined,
       paymentMethod: payload.paymentMethod,
-      deliveryFee: payload.deliveryFee ?? undefined,
-      deliveryZoneTitle: payload.deliveryZoneTitle ?? undefined,
-      items: payload.items
+      deliveryFee: deliveryFee ?? undefined,
+      deliveryZoneTitle: selectedZone.title,
+      items: restaurantItems.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      }))
     };
+
+    await appendPersistedOrder(order);
 
     let telegramDelivered = false;
 

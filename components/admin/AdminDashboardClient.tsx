@@ -1,22 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
 import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
 import { formatMoney } from "@/lib/format";
-import { readStoredOrders } from "@/lib/orders";
 import type { AdminOrder, Restaurant } from "@/types";
 
 export function AdminDashboardClient({
-  initialOrders,
+  orders,
   restaurants
 }: {
-  initialOrders: AdminOrder[];
+  orders: AdminOrder[];
   restaurants: Restaurant[];
 }) {
-  const [storedOrders] = useState<AdminOrder[]>(() => readStoredOrders());
-
-  const orders = useMemo(() => [...storedOrders, ...initialOrders], [initialOrders, storedOrders]);
   const totalTurnover = orders.reduce((sum, order) => sum + order.total, 0);
   const activeOrders = orders.filter((order) => order.status !== "completed").length;
 
